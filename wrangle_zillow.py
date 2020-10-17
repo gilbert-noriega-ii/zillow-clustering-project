@@ -7,26 +7,26 @@ from acquire import get_zillow_data
 def wrangle_zillow(cached=True):
     #get zillow data
     df = get_zillow_data()
-    #filter out properties that are not single unit
-    df = df[df.propertylandusetypeid.isin([260,261])]
+    #filling nan values with people with no pools
+    df.poolcnt = df.poolcnt.fillna(0)
+    #filling nan values with people with no fireplace
+    df.fireplacecnt = df.fireplacecnt.fillna(0)
+    #filling NaN heating systems with None
+    df.heatingorsystemdesc = df.heatingorsystemdesc.fillna("None")
     #changing fips number to labeled county
     df['county'] = df.fips.replace([6037, 6059, 6111],['los_angeles', 'orange', 'ventura'])
-    #drop duplicate or unnecessary columns
-    df = df.drop(columns = ["id", "id.1", "propertylandusetypeid", "heatingorsystemtypeid", "propertyzoningdesc", "calculatedbathnbr", "finishedsquarefeet12", "fips"])
-    #filter out bedrooms and bathrooms == 0
-    df = df[(df.bedroomcnt > 0) & (df.bathroomcnt > 0)]
-    #filter out houses less than 400 square feet
-    df = df[df.calculatedfinishedsquarefeet > 400]
+    #filter out columns and rows with more than 40% null values
+    df = handle_missing_values(df, .6, .6)
+    #filter out bedrooms/bathrooms == 0 and <= 7
+    df = df[(df.bedroomcnt > 0) & (df.bedroomcnt <= 7) & (df.bathroomcnt > 0) & (df.bathroomcnt <= 7)]
+    #filter out houses less than 400 square feet and greater than 7000
+    df = df[(df.calculatedfinishedsquarefeet > 400) & (df.calculatedfinishedsquarefeet < 7000)]
     #fill NaN units with 1
     df.unitcnt = df.unitcnt.fillna(1.0)
     #filter out all units not equal to 1
     df = df[df.unitcnt == 1]
-    #dropping unitcnt since they are all the same and more unnecessary columns
-    df = df.drop(columns = ["unitcnt", "propertylandusedesc", "propertycountylandusecode", "assessmentyear", "pid", "regionidcounty"])
-    #filter out columns and rows with more than 40% null values
-    df = handle_missing_values(df, .6, .6)
-    #filling NaN heating systems with None
-    df.heatingorsystemdesc = df.heatingorsystemdesc.fillna("None")
+    #dropping unitcnt since they are all the same and unnecessary columns
+    df = df.drop(columns = ['propertylandusetypeid', 'calculatedbathnbr', 'finishedsquarefeet12', 'heatingorsystemtypeid', 'id', 'fips', 'fullbathcnt', 'propertyzoningdesc', 'regionidcounty', 'id.1'])
     #split into train, validate, test
     train, validate, test = zillow_split(df)
     #missing fixed values will be replaced with the mode
@@ -37,7 +37,7 @@ def wrangle_zillow(cached=True):
         validate[col].fillna(value = mode, inplace = True)
         test[col].fillna(value = mode, inplace = True)
     #missing continuous values will be replaced with the median
-    cols_cont = ['lotsizesquarefeet', 'structuretaxvaluedollarcnt', 'fullbathcnt', 'calculatedfinishedsquarefeet', 'taxamount', 'landtaxvaluedollarcnt', 'taxvaluedollarcnt']
+    cols_cont = ['lotsizesquarefeet', 'structuretaxvaluedollarcnt', 'calculatedfinishedsquarefeet', 'taxamount', 'landtaxvaluedollarcnt', 'taxvaluedollarcnt']
     for col in cols_cont:
         median = train[col].median()
         train[col].fillna(median, inplace=True)
