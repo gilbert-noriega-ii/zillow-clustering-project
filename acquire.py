@@ -23,11 +23,9 @@ def new_zillow_data():
     write it to a csv file, and returns the df.
     '''
     sql_query = '''
-                select * from properties_2017
-                join (select id, logerror, pid, tdate from predictions_2017 pred_2017
-                join (SELECT parcelid as pid, Max(transactiondate) as tdate FROM predictions_2017 GROUP BY parcelid) as sq1
-                on (pred_2017.parcelid = sq1.pid and pred_2017.transactiondate = sq1.tdate)) as sq2
-                on (properties_2017.parcelid = sq2.pid)
+                select * 
+                from properties_2017
+                join predictions_2017 using (parcelid)
                 left join airconditioningtype using (airconditioningtypeid)
                 left join architecturalstyletype using (architecturalstyletypeid)
                 left join buildingclasstype using (buildingclasstypeid)
@@ -38,7 +36,7 @@ def new_zillow_data():
                 left join unique_properties using (parcelid)
                 where latitude is not null 
                 and longitude is not null
-                and tdate between '2017-01-01' and '2017-12-31';
+                and propertylandusetypeid = 261;
                 '''
     df = pd.read_sql(sql_query, get_connection('zillow'))
     df.to_csv('zillow_df.csv')
