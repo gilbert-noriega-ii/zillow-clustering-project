@@ -18,14 +18,14 @@ def wrangle_zillow(cached=True):
     #filter out columns and rows with more than 40% null values
     df = handle_missing_values(df, .6, .6)
     #dropping unitcnt since they are all the same and unnecessary columns
-    df = df.drop(columns = ['propertylandusetypeid', 'calculatedbathnbr', 
-                            'finishedsquarefeet12', 'heatingorsystemtypeid', 
-                            'id', 'fips', 'fullbathcnt', 'propertyzoningdesc', 
-                            'regionidcounty', 'id.1'])
+    df = df.drop(columns = ['propertylandusetypeid', 'propertycountylandusecode', 'propertylandusedesc',
+                             'calculatedbathnbr', 'finishedsquarefeet12', 'heatingorsystemtypeid', 
+                            'id', 'fips', 'fullbathcnt', 'propertyzoningdesc', 'unitcnt',
+                            'regionidcounty', 'id.1', 'assessmentyear', 'censustractandblock', 'rawcensustractandblock'])
     #split into train, validate, test
     train, validate, test = zillow_split(df)
     #missing fixed values will be replaced with the mode
-    cols_fixed = ['buildingqualitytypeid', 'regionidcity', 'censustractandblock', 
+    cols_fixed = ['buildingqualitytypeid', 'regionidcity', 
                         'regionidzip', 'age']
     for col in cols_fixed:
         mode = int(train[col].mode())
@@ -89,15 +89,14 @@ def create_features(df):
     county_df = pd.get_dummies(df.county)
     #adding dummies back into main dataframe
     df = pd.concat([df, county_df], axis=1)
-    # 12447 is the ID for city of LA. 
-    # I confirmed through sampling and plotting, as well as looking up a few addresses.
-    df['cola'] = df['regionidcity'].apply(lambda x: 1 if x == 12447.0 else 0)
+    #duplicating logerror so it will be at the end of the list
+    df['error'] = df.logerror
     #filter out outliers on new features
     df = df[(df.acres < 10) & (df.taxrate < .05)]
     #drop duplicate columns
     df = df.drop(columns = ['bathroomcnt', 'county', 'taxamount', 'taxvaluedollarcnt', 
                        'structuretaxvaluedollarcnt', 'landtaxvaluedollarcnt', 
-                       'yearbuilt', 'lotsizesquarefeet'])
+                       'yearbuilt', 'lotsizesquarefeet', 'logerror'])
     return df
 
 
