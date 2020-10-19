@@ -1,12 +1,19 @@
 import pandas as pd
 
 from sklearn.model_selection import train_test_split
+import sklearn.preprocessing
 
 from acquire import get_zillow_data
 
 
 
 def wrangle_zillow(cached=True):
+    '''
+    This function prepares the data for exploration by 
+    handling null values and outliers,
+    creating new features from existing features,
+    and splitting the data into train, validate and test
+    '''
     #get zillow data
     df = get_zillow_data()
     #filling nulls with appropriate values
@@ -21,7 +28,8 @@ def wrangle_zillow(cached=True):
     df = df.drop(columns = ['propertylandusetypeid', 'propertycountylandusecode', 'propertylandusedesc',
                              'calculatedbathnbr', 'finishedsquarefeet12', 'heatingorsystemtypeid', 
                             'id', 'fips', 'fullbathcnt', 'propertyzoningdesc', 'unitcnt',
-                            'regionidcounty', 'id.1', 'assessmentyear', 'censustractandblock', 'rawcensustractandblock'])
+                            'regionidcounty', 'id.1', 'assessmentyear', 
+                            'censustractandblock', 'rawcensustractandblock'])
     #split into train, validate, test
     train, validate, test = zillow_split(df)
     #missing fixed values will be replaced with the mode
@@ -64,6 +72,8 @@ def remove_outliers(df):
     df = df[(df.calculatedfinishedsquarefeet > 400) & (df.calculatedfinishedsquarefeet < 7000)]
     #filter out all units not equal to 1
     df = df[df.unitcnt == 1]
+    #removing heating or system source outliers
+    df = df[~df.heatingorsystemdesc.isin(['Yes', 'Gravity', 'Radiant', 'Baseboard', 'Solar', 'Forced air'])]
     return df
 
 
@@ -85,10 +95,13 @@ def create_features(df):
     df['bed_bath_ratio'] = df.bedroomcnt/df.bathroomcnt
     #changing numbered labels into appropriate names
     df['county'] = df.fips.replace([6037, 6059, 6111],['los_angeles', 'orange', 'ventura'])
+    #changing names of heating system
+    df.heatingorsystemdesc = df.heatingorsystemdesc.replace(['Central', 'Floor/Wall', 'None'], ['central_heating', 'floor_wall_heating', 'no_heating'])
     #creating dummy variables
     county_df = pd.get_dummies(df.county)
+    heating_or_system_df = pd.get_dummies(df.heatingorsystemdesc)
     #adding dummies back into main dataframe
-    df = pd.concat([df, county_df], axis=1)
+    df = pd.concat([df, county_df, heating_or_system_df], axis=1)
     #duplicating logerror so it will be at the end of the list
     df['error'] = df.logerror
     #filter out outliers on new features
@@ -128,7 +141,38 @@ def zillow_split(df):
     train, validate = train_test_split(train_and_validate, train_size = .7, random_state=123)
     return train, validate, test
 
-
+def scaled_zillow_columns(cached = True):
+    '''
+    This function uses a MinMaxScaler to scale numeric columns
+    from the wrangle_zillow function
+    '''
+    train, validate, test = wrangle_zillow()
+    columns_to_scale= ['bedroomcnt', 'buildingqualitytypeid', 'calculatedfinishedsquarefeet', 'fireplacecnt', 'latitude', 'longitude', 'poolcnt', 'regionidcity', 'regionidzip', 'roomcnt', 'age', 'taxrate', 'taxrate', 'acres', 'structure_dollar_per_sqft', 'land_dollar_per_sqft', 'bed_bath_ratio']
+    #initialize scaler function
+    scaler = sklearn.preprocessing.MinMaxScaler()
+    #adds '_scaled' to columns that will be scaled
+    new_column_names = [c + '_scaled' for c in columns_to_scale]
+    #fitting columns to be scaled
+    scaler.fit(train[columns_to_scale])
+    #adding scaled columns back into their respective dataframes
+    train = pd.concat([
+        train,
+        pd.DataFrame(scaler.transform(train[columns_to_scale]), columns=new_column_names, index=train.index),
+    ], axis=1)
+    validate = pd.concat([
+        validate,
+        pd.DataFrame(scaler.transform(validate[columns_to_scale]), columns=new_column_names, index=validate.index),
+    ], axis=1)
+    test = pd.concat([
+        test,
+        pd.DataFrame(scaler.transform(test[columns_to_scale]), columns=new_column_names, index=test.index),
+    ], axis=1)
+    
+    train = train.drop(columns = columns_to_scale)
+    validate= validate.drop(columns = columns_to_scale)
+    test = test.drop(columns = columns_to_scale)
+    
+    return train, validate, test
 
 
 ################################# Null Finder Functions #################################
