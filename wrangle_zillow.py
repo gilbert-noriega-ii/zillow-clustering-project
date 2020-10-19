@@ -109,7 +109,7 @@ def create_features(df):
     #drop duplicate columns
     df = df.drop(columns = ['bathroomcnt', 'county', 'taxamount', 'taxvaluedollarcnt', 
                        'structuretaxvaluedollarcnt', 'landtaxvaluedollarcnt', 
-                       'yearbuilt', 'lotsizesquarefeet', 'logerror'])
+                       'yearbuilt', 'lotsizesquarefeet', 'logerror', 'heatingorsystemdesc'])
     return df
 
 
