@@ -29,25 +29,11 @@ def wrangle_zillow(cached=True):
                              'calculatedbathnbr', 'finishedsquarefeet12', 'heatingorsystemtypeid', 
                             'id', 'fips', 'fullbathcnt', 'propertyzoningdesc', 'unitcnt',
                             'regionidcounty', 'id.1', 'assessmentyear', 
-                            'censustractandblock', 'rawcensustractandblock'])
+                            'censustractandblock', 'rawcensustractandblock', 'buildingqualitytypeid'])
+    #drop all rows with missing values
+    df.dropna(inplace = True)
     #split into train, validate, test
     train, validate, test = zillow_split(df)
-    #missing fixed values will be replaced with the mode
-    cols_fixed = ['buildingqualitytypeid', 'regionidcity', 
-                        'regionidzip', 'age']
-    for col in cols_fixed:
-        mode = int(train[col].mode())
-        train[col].fillna(value = mode, inplace = True)
-        validate[col].fillna(value = mode, inplace = True)
-        test[col].fillna(value = mode, inplace = True)
-    #missing continuous values will be replaced with the median
-    cols_cont = ['taxrate', 'acres', 'structure_dollar_per_sqft', 'land_dollar_per_sqft']
-    for col in cols_cont:
-        median = train[col].median()
-        train[col].fillna(median, inplace=True)
-        validate[col].fillna(median, inplace=True)
-        test[col].fillna(median, inplace=True)
-    #return null free train, validate and test datasets
     return train, validate, test
 
 
