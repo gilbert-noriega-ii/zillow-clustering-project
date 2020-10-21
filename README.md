@@ -1,8 +1,6 @@
 <a id='section_6'></a>
-<img src= 
-"
-https://www.investopedia.com/thmb/zYw_VrQD4QAfkV3b_SaFzb9NOpo=/960x416/filters:no_upscale():max_bytes(150000):strip_icc()/Zillow2-d26f9db6cd8842d1a999cb70e5dadd3a.jpg"
-         align="right"> 
+<img src="https://www.underconsideration.com/brandnew/archives/zillow_logo.png">
+
 
 <h1><center>Zillow Clustering Project</center></h1>
 <center> Author: Gilbert Noriega </center>
