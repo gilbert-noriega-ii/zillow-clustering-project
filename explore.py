@@ -3,7 +3,11 @@ import matplotlib.pyplot as plt
 
 from sklearn.cluster import KMeans
 
-def elbow_plot(cluster_vars):
+
+
+
+
+def elbow_plot(cluster_vars, X_train_scaled):
     # elbow method to identify good k for us
     ks = range(2,20)
     
@@ -27,43 +31,24 @@ def elbow_plot(cluster_vars):
     plt.show()
 
 
-def run_kmeans(k, cluster_vars, cluster_col_name):
+def run_kmeans(k, cluster_vars, cluster_col_name, X_train_scaled):
     # create kmeans object
     kmeans = KMeans(n_clusters = k, random_state = 13)
     kmeans.fit(X_train_scaled[cluster_vars])
     # predict and create a dataframe with cluster per observation
-    train_clusters = \
-        pd.DataFrame(kmeans.predict(X_train_scaled[cluster_vars]),
+    train_clusters = pd.DataFrame(kmeans.predict(X_train_scaled[cluster_vars]),
                               columns=[cluster_col_name],
                               index=X_train_scaled.index)
     
     return train_clusters, kmeans
 
-def get_centroids(cluster_vars, cluster_col_name):
-    centroid_col_names = ['centroid_' + i for i in cluster_vars]
 
-    centroids = pd.DataFrame(kmeans.cluster_centers_, 
-             columns=centroid_col_names).reset_index().rename(columns={'index': cluster_col_name})
-    
-    return centroids
-
-
-def add_to_train(cluster_col_name):
+def add_to_train(train_clusters, cluster_col_name, X_train, X_train_scaled):
     # concatenate cluster id
-    X_train2 = pd.concat([X_train, train_clusters], axis=1)
-
-    # join on clusterid to get centroids
-    X_train2 = X_train2.merge(centroids, how='left', 
-                            on=cluster_col_name).\
-                        set_index(X_train.index)
+    X_train = pd.concat([X_train, train_clusters], axis=1)
     
     # concatenate cluster id
-    X_train_scaled2 = pd.concat([X_train_scaled, train_clusters], 
+    X_train_scaled = pd.concat([X_train_scaled, train_clusters], 
                                axis=1)
-
-    # join on clusterid to get centroids
-    X_train_scaled2 = X_train_scaled2.merge(centroids, how='left', 
-                                          on=cluster_col_name).\
-                            set_index(X_train.index)
-    
-    return X_train2, X_train_scaled2
+                               
+    return X_train, X_train_scaled
