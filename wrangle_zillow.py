@@ -93,9 +93,9 @@ def create_features(df):
     #filter out outliers on new features
     df = df[(df.acres < 10) & (df.taxrate < .05)]
     #drop duplicate columns
-    df = df.drop(columns = ['bathroomcnt', 'county', 'taxamount', 'taxvaluedollarcnt', 
+    df = df.drop(columns = ['bathroomcnt', 'taxamount', 'taxvaluedollarcnt', 
                        'structuretaxvaluedollarcnt', 'landtaxvaluedollarcnt', 
-                       'yearbuilt', 'lotsizesquarefeet', 'logerror', 'heatingorsystemdesc'])
+                       'yearbuilt', 'lotsizesquarefeet', 'logerror'])
     return df
 
 
@@ -133,7 +133,7 @@ def scaled_zillow_columns(cached = True):
     from the wrangle_zillow function
     '''
     train, validate, test = wrangle_zillow()
-    columns_to_scale= ['bedroomcnt', 'buildingqualitytypeid', 'calculatedfinishedsquarefeet', 'fireplacecnt', 'latitude', 'longitude', 'poolcnt', 'regionidcity', 'regionidzip', 'roomcnt', 'age', 'taxrate', 'taxrate', 'acres', 'structure_dollar_per_sqft', 'land_dollar_per_sqft', 'bed_bath_ratio']
+    columns_to_scale= ['bedroomcnt', 'calculatedfinishedsquarefeet', 'fireplacecnt', 'latitude', 'longitude', 'poolcnt', 'regionidcity', 'regionidzip', 'roomcnt', 'age', 'taxrate', 'acres', 'structure_dollar_per_sqft', 'land_dollar_per_sqft', 'bed_bath_ratio']
     #initialize scaler function
     scaler = sklearn.preprocessing.MinMaxScaler()
     #adds '_scaled' to columns that will be scaled
