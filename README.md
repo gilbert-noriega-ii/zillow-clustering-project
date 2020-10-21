@@ -1,4 +1,10 @@
 <a id='section_6'></a>
+<img src= 
+"
+https://www.investopedia.com/thmb/zYw_VrQD4QAfkV3b_SaFzb9NOpo=/960x416/filters:no_upscale():max_bytes(150000):strip_icc()/Zillow2-d26f9db6cd8842d1a999cb70e5dadd3a.jpg" 
+         alt="GeeksforGeeks logo" 
+         align="right"> 
+
 <h1><center>Zillow Clustering Project</center></h1>
 <center> Author: Gilbert Noriega </center>
 
@@ -24,7 +30,7 @@ ___
 ___
 
 ### Goals
-> My goal for this project is to create a model that will find what is driving the errors in the Zestimates of single unit properties in 2017 by including clustering methodologies. We will deliver the following in a github repository: 
+> My goal for this project is to create a model that will find what is driving the errors in the Zestimates of single unit properties in 2017 by including clustering methodologies. I will deliver the following in a github repository: 
 >
 > - A clearly named final notebook. This notebook will be what I present and will contain plenty of markdown documentation and cleaned up code.
 > - A README that explains what the project is, how to reproduce you work, and your notes from project planning
@@ -39,15 +45,27 @@ ___
 
 | Features | Definition |
 | :------- | :-------|
-| bathroom | the amount of bathrooms inside the home |
-| bedroom  | the amount of bedrooms inside the home |
-| sqft| the total square feet of the home |
-| fips  | numeric codes which uniquely identify geographic areas |
-| fullbathcnt | the amount of full bathrooms(shower included) inside the home |
-| lotsqft  | the total square feet of the entire property |
-| poolcnt | amount of pools at the home|
-| roomcnt  | the total amount of rooms inside the home |
-| yearbuilt | the year the home was built |
+| structure_dollar_per_sqft | the amount per sqft for the home |
+| bedroomcnt  | the amount of bedrooms inside the home |
+| calculatedfinishedsquarefeet| the total square feet of the home |
+| orange  | orange county |
+| no heating | no heating system |
+| longitude  | the longitude coordinate|
+| los_angeles | los_angeles county|
+| latitude  | the latitude coordinate |
+| taxrate | tax amount divided by tax valuedollarcnt |
+| central_heating | central heating system |
+| poolcnt  | the number of pools |
+| roomcnt| the total number of rooms |
+| age  | years since it has been built |
+| land_dollar_per_sqft | price of the home per sqft |
+| acres  | the amount of the land |
+| floor_wall_heating | type of heating system|
+| fireplacecnt  | the total amount of fireplaces |
+| bed_bath_ratio | the ratio of bedrooms to bathrooms |
+| regionidcity | region id city number |
+| regionidzip  | region id zip number|
+| ventura | ventura county  |
 
 |  Target  | Definition |
 |:-------- |:---------- |
@@ -65,13 +83,32 @@ ___
 
 >### Hypothesis
 > - Hypothesis 1:
->   - H<sub>0</sub>: ____ and ____ are **independent**
->   - H<sub>a</sub>: ____ and ____ are **dependent**
+>   - H<sub>0</sub>: The mean logerror is the **same** across all counties
+>   - H<sub>a</sub>: The mean logerror is **not the same** across all counties
 >
 > - Hypothesis 2:
->   - H<sub>0</sub>: There is **no difference** ____
->   - H<sub>a</sub>: There is **a difference** ____
-
+>   - H<sub>0</sub>: Log errors for low cost per sqft houses **are the same** as the log errors for the rest of the houses
+>   - H<sub>a</sub>: Log errors for low cost per sqft houses **are different** than the log errors for the rest of the houses
+>
+> - Hypothesis 3:
+>   - H<sub>0</sub>: The mean logerror is the **same** across all bedrooms
+>   - H<sub>a</sub>: The mean logerror is **not the same** across all bedrooms
+>
+> - Hypothesis 4:
+>   - H<sub>0</sub>: The mean logerror is the **same** across all heating systems
+>   - H<sub>a</sub>: The mean logerror is the **same** across all heating systems
+>
+> - Hypothesis 5:
+>   - H<sub>0</sub>: The mean logerror is the **same** across all size clusters
+>   - H<sub>a</sub>: The mean logerror is **not the same** across all size clusters
+>
+> - Hypothesis 6:
+>   - H<sub>0</sub>: The mean logerror is the **same** across all feature clusters
+>   - H<sub>a</sub>: The mean logerror is the **same** across all feature clusters
+>
+> - Hypothesis 7:
+>   - H<sub>0</sub>: The mean logerror is the **same** across all value clusters
+>   - H<sub>a</sub>: The mean logerror is the **same** across all value clusters
 
 [back to the top](#section_6)
 ___
@@ -95,9 +132,9 @@ ___
 >    - plot the continuous variables
 >    - plot correlation matrix of all variables
 >    - create clusters and document its usefulness/helpfulness
->
+> 
 >- model and evaluation
->    - which features are most influential: use SelectKBest and rfe
+>    - which features are most influential: use rfe
 >    - try different algorithms: LinearRegression, LassoLars, Polynomial Regression
 >    - evaluate on train
 >    - evaluate on validate
@@ -119,7 +156,7 @@ ___
 ## How to Reproduce
 
 >1. Download data from zillow database in MySQL with Codeup credentials.
->2. Install acquire.py and prepare.py into your working directory.
+>2. Install acquire.py, prepare.py and model.py into your working directory.
 >3. Run a jupyter notebook importing the necessary libraries and functions.
 >4. Follow along in final_report.ipynb or forge your own exploratory path. 
 
